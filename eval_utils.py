@@ -18,12 +18,8 @@ import misc.utils as utils
 
 def language_eval(dataset, preds, model_id, split):
     import sys
-    if 'coco' in dataset:
-        sys.path.append("coco-caption")
-        annFile = 'coco-caption/annotations/captions_val2014.json'
-    else:
-        sys.path.append("f30k-caption")
-        annFile = 'f30k-caption/annotations/dataset_flickr30k.json'
+    sys.path.append("chinese-caption")
+    annFile = 'chinese-caption/annotations/caption_annotations.json'
     from pycocotools.coco import COCO
     from pycocoevalcap.eval import COCOEvalCap
 
@@ -105,6 +101,9 @@ def eval_split(model, crit, loader, eval_kwargs={}):
         sents = utils.decode_sequence(loader.get_vocab(), seq)
 
         for k, sent in enumerate(sents):
+            if verbose:
+                print('image %s: %s' %(data['infos'][k]['id'], sent))
+            sent = sent.replace(' ', '')
             entry = {'image_id': data['infos'][k]['id'], 'caption': sent}
             if eval_kwargs.get('dump_path', 0) == 1:
                 entry['file_name'] = data['infos'][k]['file_path']
@@ -114,9 +113,6 @@ def eval_split(model, crit, loader, eval_kwargs={}):
                 cmd = 'cp "' + os.path.join(eval_kwargs['image_root'], data['infos'][k]['file_path']) + '" vis/imgs/img' + str(len(predictions)) + '.jpg' # bit gross
                 print(cmd)
                 os.system(cmd)
-
-            if verbose:
-                print('image %s: %s' %(entry['image_id'], entry['caption']))
 
         # if we wrapped around the split or used up val imgs budget then bail
         ix0 = data['bounds']['it_pos_now']

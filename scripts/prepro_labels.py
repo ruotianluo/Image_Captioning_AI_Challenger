@@ -81,13 +81,13 @@ def build_vocab(imgs, params):
   if bad_count > 0:
     # additional special UNK token we will use below to map infrequent words to
     print('inserting the special UNK token')
-    vocab.append('UNK')
+    vocab.append(u'\u534d')
   
   for img in imgs:
     img['final_captions'] = []
     for sent in img['sentences']:
       txt = sent['tokens']
-      caption = [w if counts.get(w,0) > count_thr else 'UNK' for w in txt]
+      caption = [w if counts.get(w,0) > count_thr else u'\u534d' for w in txt]
       img['final_captions'].append(caption)
 
   return vocab
