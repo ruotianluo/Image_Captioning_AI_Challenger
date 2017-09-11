@@ -1,3 +1,4 @@
+# coding: utf-8
 """
 Preprocess a raw json dataset into hdf5/json files for use in data_loader.lua
 
@@ -87,7 +88,7 @@ def build_vocab(imgs, params):
     img['final_captions'] = []
     for sent in img['sentences']:
       txt = sent['tokens']
-      caption = [w if counts.get(w,0) > count_thr else u'\u534d' for w in txt]
+      caption = [w if counts.get(w,0) > count_thr else u'卐' for w in txt]
       img['final_captions'].append(caption)
 
   return vocab
