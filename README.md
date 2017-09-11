@@ -7,7 +7,7 @@ Changes compared to neuraltalk2.
 - Much more models (you can check out models folder). The latest topdown model can achieve 1.07 Cider score on Karpathy's test split with beam size 5.
 
 ## Requirements
-Python 2.7 (because there is no [coco-caption](https://github.com/tylin/coco-caption) version for python 3)
+Python 2.7 
 PyTorch 0.2 (along with torchvision)
 
 You need to download pretrained resnet model for both training and evaluation. The models can be downloaded from [here](https://drive.google.com/open?id=0B7fNdx_jAqhtbVYzOURMdDNHSGM), and should be placed in `data/imagenet_weights`.
@@ -29,13 +29,14 @@ Download preprocessed coco captions from [link](http://cs.stanford.edu/people/ka
 Once we have these, we can now invoke the `prepro_*.py` script, which will read all of this in and create a dataset (two feature folders, a hdf5 label file and a json file).
 
 ```bash
-$ python scripts/prepro_labels.py --input_json data/dataset_coco.json --output_json data/cocotalk.json --output_h5 data/cocotalk
-$ python scripts/prepro_feats.py --input_json data/dataset_coco.json --output_dir data/cocotalk --images_root $IMAGE_ROOT
+$ python scripts/prepro_split_tokenize.py --input_json ./data/ai_challenger_caption_train_20170902/caption_train_annotations_20170902.json --output_json ./data/data_chinese.json --num_val 10000 --num_test 10000
+$ python scripts/prepro_labels.py --input_json data/dataset_chinese.json --output_json data/chinese_talk.json --output_h5 data/chinese_talk
+$ python scripts/prepro_feats.py --input_json data/data_chinese.json --output_dir data/chinese_talk --images_root $IMAGE_ROOT
 ```
 
-`prepro_labels.py` will map all words that occur <= 5 times to a special `UNK` token, and create a vocabulary for all the remaining words. The image information and vocabulary are dumped into `data/cocotalk.json` and discretized caption data are dumped into `data/cocotalk_label.h5`.
+`prepro_labels.py` will map all words that occur <= 5 times to a special `UNK` token, and create a vocabulary for all the remaining words. The image information and vocabulary are dumped into `data/chinese_talk.json` and discretized caption data are dumped into `data/chinese_talk_label.h5`.
 
-`prepro_feats.py` extract the resnet101 features (both fc feature and last conv feature) of each image. The features are saved in `data/cocotalk_fc` and `data/cocotalk_att`, and resulting files are about 200GB.
+`prepro_feats.py` extract the resnet101 features (both fc feature and last conv feature) of each image. The features are saved in `data/chinese_talk_fc` and `data/chinese_talk_att`, and resulting files are about 200GB.
 
 (Check the prepro scripts for more options, like other resnet models or other attention sizes.)
 
@@ -55,7 +56,7 @@ If you have tensorflow, the loss histories are automatically dumped into `--chec
 
 The current command use scheduled sampling, you can also set scheduled_sampling_start to -1 to turn off scheduled sampling.
 
-If you'd like to evaluate BLEU/METEOR/CIDEr scores during training in addition to validation cross entropy loss, use `--language_eval 1` option, but don't forget to download the [coco-caption code](https://github.com/tylin/coco-caption) into `coco-caption` directory.
+If you'd like to evaluate BLEU/METEOR/CIDEr scores during training in addition to validation cross entropy loss, use `--language_eval 1` option, but don't forget to download the [chinese-caption code](https://github.com/ruotianluo/chinese-caption.git) into `chinese-caption` directory.
 
 For more options, see `opts.py`. 
 
