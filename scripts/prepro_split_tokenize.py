@@ -46,8 +46,11 @@ def prepro_captions(imgs, params):
     img['sentences'] = []
     for j,s in enumerate(img['caption']):
       txt = {'tokens': tokenize(s, params)}
-      img['sentences'].append(txt)
+      if len(txt['tokens']) > 0:
+        img['sentences'].append(txt)
       if i < 10 and j == 0: print(*txt['tokens'])
+    if img['sentences'] == 0:
+      print('One image with no captions')
 
 def assign_splits(imgs, params):
   num_val = params['num_val']
