@@ -66,7 +66,7 @@ For more options, see `opts.py`.
 
 First you should preprocess the dataset and get the cache for calculating cider score:
 ```
-$ python scripts/prepro_ngrams.py --input_json .../dataset_coco.json --dict_json data/cocotalk.json --output_pkl data/coco-train --split train
+$ python scripts/prepro_ngrams.py --input_json .../data_chinese.json --dict_json data/chinese_talk.json --output_pkl data/chinese-train --split train
 ```
 
 And also you need to clone my forked [cider](https://github.com/ruotianluo/cider) repository.

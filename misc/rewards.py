@@ -13,7 +13,7 @@ import sys
 sys.path.append("cider")
 from pyciderevalcap.ciderD.ciderD import CiderD
 
-CiderD_scorer = CiderD(df='coco-train-idxs')
+CiderD_scorer = CiderD(df='chinese-train-idxs')
 #CiderD_scorer = CiderD(df='corpus')
 
 def array_to_str(arr):
