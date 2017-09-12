@@ -18,10 +18,10 @@ import misc.utils as utils
 
 def language_eval(dataset, preds, model_id, split):
     import sys
-    sys.path.append("chinese-caption")
-    annFile = 'chinese-caption/annotations/caption_annotations.json'
-    from pycocotools.coco import COCO
-    from pycocoevalcap.eval import COCOEvalCap
+    sys.path.append("AI_Challenger/chuangxin_eval_public/caption_eval")
+    annFile = 'data/eval_reference.json'
+    from coco_caption.pycxtools.coco import COCO
+    from coco_caption.pycxevalcap.eval import COCOEvalCap
 
     encoder.FLOAT_REPR = lambda o: format(o, '.3f')
 
@@ -31,15 +31,15 @@ def language_eval(dataset, preds, model_id, split):
 
     coco = COCO(annFile)
     valids = coco.getImgIds()
-
     # filter results to only those in MSCOCO validation set (will be about a third)
-    preds_filt = [p for p in preds if p['image_id'] in valids]
-    print('using %d/%d predictions' % (len(preds_filt), len(preds)))
-    json.dump(preds_filt, open(cache_path, 'w')) # serialize to temporary json file. Sigh, COCO API...
+    # preds_filt = [p for p in preds if p['image_id'] in valids]
+    # print('using %d/%d predictions' % (len(preds_filt), len(preds)))
+    json.dump(preds, open(cache_path, 'w')) # serialize to temporary json file. Sigh, COCO API...
 
     cocoRes = coco.loadRes(cache_path)
     cocoEval = COCOEvalCap(coco, cocoRes)
     cocoEval.params['image_id'] = cocoRes.getImgIds()
+    print(len(set(cocoRes.getImgIds()) & set(coco.getImgIds())))
     cocoEval.evaluate()
 
     # create output dictionary
@@ -48,9 +48,9 @@ def language_eval(dataset, preds, model_id, split):
         out[metric] = score
 
     imgToEval = cocoEval.imgToEval
-    for p in preds_filt:
-        image_id, caption = p['image_id'], p['caption']
-        imgToEval[image_id]['caption'] = caption
+    # for p in preds:
+    #     image_id, caption = p['image_id'], p['caption']
+    #     imgToEval[image_id]['caption'] = caption
     with open(cache_path, 'w') as outfile:
         json.dump({'overall': out, 'imgToEval': imgToEval}, outfile)
 

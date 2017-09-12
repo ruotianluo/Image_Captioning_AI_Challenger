@@ -10,6 +10,7 @@ Changes compared to neuraltalk2.
 Python 2.7 
 PyTorch 0.2 (along with torchvision)
 jieba
+hashlib
 
 You need to download pretrained resnet model for both training and evaluation. The models can be downloaded from [here](https://drive.google.com/open?id=0B7fNdx_jAqhtbVYzOURMdDNHSGM), and should be placed in `data/imagenet_weights`.
 
@@ -44,6 +45,8 @@ Once we have the images and the annotations, we can now invoke the `prepro_*.py`
 $ python scripts/prepro_split_tokenize.py --input_json ./data/ai_challenger/caption_train_annotations_20170902.json ./data/ai_challenger/caption_validation_annotations_20170910.json --output_json ./data/data_chinese.json --num_val 10000 --num_test 10000
 $ python scripts/prepro_labels.py --input_json data/data_chinese.json --output_json data/chinese_talk.json --output_h5 data/chinese_talk --max_length 20 --word_count_threshold 20
 $ python scripts/prepro_feats.py --input_json data/data_chinese.json --output_dir data/chinese_talk --images_root data/ai_challenger --att_size 7
+$ python scripts/prepro_reference_json.py --input_json ./data/ai_challenger/caption_train_annotations_20170902.json ./data/ai_challenger/caption_validation_annotations_20170910.json --output_json ./data/eval_reference.json
+
 ```
 
 `prepro_split_tokenize` will conbine both training and validation data, and randomly the dataset into train, val and test. It will also tokenize the captions using jiebe.
@@ -51,6 +54,8 @@ $ python scripts/prepro_feats.py --input_json data/data_chinese.json --output_di
 `prepro_labels.py` will map all words that occur <= 20 times to a special `卍` token, and create a vocabulary for all the remaining words. The image information and vocabulary are dumped into `data/chinese_talk.json` and discretized caption data are dumped into `data/chinese_talk_label.h5`.
 
 `prepro_feats.py` extract the resnet101 features (both fc feature and last conv feature) of each image. The features are saved in `data/chinese_talk_fc` and `data/chinese_talk_att`, and resulting files are about 100GB.
+
+`prepro_reference_json.py` will prepare the json file for caption evaluation.
 
 (Check the prepro scripts for more options, like other resnet models or other attention sizes.)
 
@@ -68,7 +73,7 @@ If you have tensorflow, the loss histories are automatically dumped into `--chec
 
 The current command use scheduled sampling, you can also set scheduled_sampling_start to -1 to turn off scheduled sampling.
 
-If you'd like to evaluate BLEU/METEOR/CIDEr scores during training in addition to validation cross entropy loss, use `--language_eval 1` option, but don't forget to download the [chinese-caption code](https://github.com/ruotianluo/chinese-caption.git) into `chinese-caption` directory.
+If you'd like to evaluate BLEU/METEOR/CIDEr scores during training in addition to validation cross entropy loss, use `--language_eval 1` option, but don't forget to download the [evaluation code](https://github.com/AIChallenger/AI_Challenger) into `AI_Challenger` directory.
 
 For more options, see `opts.py`. 
 
