@@ -1,3 +1,4 @@
+# coding: utf-8
 """
 Preprocess a raw json dataset into hdf5/json files for use in data_loader.lua
 
@@ -35,8 +36,7 @@ from random import shuffle, seed
 def tokenize(sent, params):
   if params['tokenize'] == 'jieba':
     import jieba
-    return jieba.lcut(sent)
-
+    return list(jieba.cut(sent.strip().replace(u'。',''), cut_all=False))
 
 def prepro_captions(imgs, params):
   
@@ -46,8 +46,11 @@ def prepro_captions(imgs, params):
     img['sentences'] = []
     for j,s in enumerate(img['caption']):
       txt = {'tokens': tokenize(s, params)}
-      img['sentences'].append(txt)
+      if len(txt['tokens']) > 0:
+        img['sentences'].append(txt)
       if i < 10 and j == 0: print(*txt['tokens'])
+    if img['sentences'] == 0:
+      print('One image with no captions')
 
 def assign_splits(imgs, params):
   num_val = params['num_val']
@@ -63,7 +66,13 @@ def assign_splits(imgs, params):
 
 def main(params):
 
-  imgs = json.load(open(params['input_json'], 'r'))
+  imgs = {filename[filename.rfind('/')+1:filename.rfind('.')].replace('annotations', 'images'):json.load(open(filename, 'r')) for filename in params['input_json']}
+  tmp = []
+  for k in imgs.keys():
+    for img in imgs[k]:
+      img['filename'] = k+'/'+img['image_id']
+      tmp.append(img)
+  imgs = tmp
   seed(123) # make reproducible
   shuffle(imgs) # shuffle the order
 
@@ -80,7 +89,7 @@ def main(params):
     jimg = {}
     jimg['split'] = img['split']
     jimg['cocoid'] = img['image_id']
-    jimg['filename'] = img['image_id']
+    jimg['filename'] = img['filename']
     jimg['filepath'] = ''
     jimg['sentences'] = img['sentences']
 
@@ -94,7 +103,7 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser()
 
   # input json
-  parser.add_argument('--input_json', required=True, help='input json file to process into hdf5')
+  parser.add_argument('--input_json', nargs='+', required=True, help='input json file to process into hdf5')
   parser.add_argument('--num_val', required=True, type=int, help='number of images to assign to validation data (for CV etc)')
   parser.add_argument('--output_json', default='data.json', help='output json file')
   parser.add_argument('--tokenize', default='jieba', help='jieba or ...')

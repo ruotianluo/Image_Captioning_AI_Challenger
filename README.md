@@ -10,6 +10,8 @@ This is based on my [neuraltalk2.pytorch](https://github.com/ruotianluo/neuralta
 ## Requirements
 Python 2.7 
 PyTorch 0.2 (along with torchvision)
+jieba
+hashlib
 
 You need to download pretrained resnet model for both training and evaluation. The models can be downloaded from [here](https://drive.google.com/open?id=0B7fNdx_jAqhtbVYzOURMdDNHSGM), and should be placed in `data/imagenet_weights`.
 
@@ -20,27 +22,42 @@ If you want to do evaluation only, then you can follow [this section](#generate-
 
 ## Train your own network on COCO
 
-### Download COCO dataset and preprocessing
+### Download ai_challenger dataset and preprocessing
 
-First, download the coco images from [link](http://mscoco.org/dataset/#download). We need 2014 training images and 2014 val. images. You should put the `train2014/` and `val2014/` in the same directory, denoted as `$IMAGE_ROOT`.
+First, download the ai_challenger images from [link](https://challenger.ai/competition/caption/subject). We need both training and validationd data. We decompress the data into a same folder, say `data/ai_challenger`, the structure would look like:
 
-Download preprocessed coco captions from [link](http://cs.stanford.edu/people/karpathy/deepimagesent/caption_datasets.zip) from Karpathy's homepage. Extract `dataset_coco.json` from the zip file and copy it in to `data/`. This file provides preprocessed captions and also standard train-val-test splits.
+```
+├── data
+│   ├── ai_challenger
+│   │   ├── caption_train_annotations_20170902.json
+│   │   ├── caption_train_images_20170902
+│   │   │   ├── ...
+│   │   ├── caption_validataion_annotations_20170910.json
+│   │   ├── caption_validation_images_20170910
+│   │   │   ├── ...
+│   ├── ...
 
-Once we have these, we can now invoke the `prepro_*.py` script, which will read all of this in and create a dataset (two feature folders, a hdf5 label file and a json file).
-
-```bash
-$ python scripts/prepro_split_tokenize.py --input_json ./data/ai_challenger_caption_train_20170902/caption_train_annotations_20170902.json --output_json ./data/data_chinese.json --num_val 10000 --num_test 10000
-$ python scripts/prepro_labels.py --input_json data/dataset_chinese.json --output_json data/chinese_talk.json --output_h5 data/chinese_talk
-$ python scripts/prepro_feats.py --input_json data/data_chinese.json --output_dir data/chinese_talk --images_root $IMAGE_ROOT
 ```
 
-`prepro_labels.py` will map all words that occur <= 5 times to a special `UNK` token, and create a vocabulary for all the remaining words. The image information and vocabulary are dumped into `data/chinese_talk.json` and discretized caption data are dumped into `data/chinese_talk_label.h5`.
+Once we have the images and the annotations, we can now invoke the `prepro_*.py` script, which will read all of this in and create a dataset (two feature folders, a hdf5 label file and a json file).
 
-`prepro_feats.py` extract the resnet101 features (both fc feature and last conv feature) of each image. The features are saved in `data/chinese_talk_fc` and `data/chinese_talk_att`, and resulting files are about 200GB.
+```bash
+$ python scripts/prepro_split_tokenize.py --input_json ./data/ai_challenger/caption_train_annotations_20170902.json ./data/ai_challenger/caption_validation_annotations_20170910.json --output_json ./data/data_chinese.json --num_val 10000 --num_test 10000
+$ python scripts/prepro_labels.py --input_json data/data_chinese.json --output_json data/chinese_talk.json --output_h5 data/chinese_talk --max_length 20 --word_count_threshold 20
+$ python scripts/prepro_feats.py --input_json data/data_chinese.json --output_dir data/chinese_talk --images_root data/ai_challenger --att_size 7
+$ python scripts/prepro_reference_json.py --input_json ./data/ai_challenger/caption_train_annotations_20170902.json ./data/ai_challenger/caption_validation_annotations_20170910.json --output_json ./data/eval_reference.json
+
+```
+
+`prepro_split_tokenize` will conbine both training and validation data, and randomly the dataset into train, val and test. It will also tokenize the captions using jiebe.
+
+`prepro_labels.py` will map all words that occur <= 20 times to a special `卍` token, and create a vocabulary for all the remaining words. The image information and vocabulary are dumped into `data/chinese_talk.json` and discretized caption data are dumped into `data/chinese_talk_label.h5`.
+
+`prepro_feats.py` extract the resnet101 features (both fc feature and last conv feature) of each image. The features are saved in `data/chinese_talk_fc` and `data/chinese_talk_att`, and resulting files are about 100GB.
+
+`prepro_reference_json.py` will prepare the json file for caption evaluation.
 
 (Check the prepro scripts for more options, like other resnet models or other attention sizes.)
-
-**Warning**: the prepro script will fail with the default MSCOCO data because one of their images is corrupted. See [this issue](https://github.com/karpathy/neuraltalk2/issues/4) for the fix, it involves manually replacing one image in the dataset.
 
 ### Start training
 
@@ -56,11 +73,11 @@ If you have tensorflow, the loss histories are automatically dumped into `--chec
 
 The current command use scheduled sampling, you can also set scheduled_sampling_start to -1 to turn off scheduled sampling.
 
-If you'd like to evaluate BLEU/METEOR/CIDEr scores during training in addition to validation cross entropy loss, use `--language_eval 1` option, but don't forget to download the [chinese-caption code](https://github.com/ruotianluo/chinese-caption.git) into `chinese-caption` directory.
+If you'd like to evaluate BLEU/METEOR/CIDEr scores during training in addition to validation cross entropy loss, use `--language_eval 1` option, but don't forget to download the [evaluation code](https://github.com/AIChallenger/AI_Challenger) into `AI_Challenger` directory.
 
 For more options, see `opts.py`. 
 
-**A few notes on training.** To give you an idea, with the default settings one epoch of MS COCO images is about 11000 iterations. After 1 epoch of training results in validation loss ~2.5 and CIDEr score of ~0.68. By iteration 60,000 CIDEr climbs up to about ~0.84 (validation loss at about 2.4 (under scheduled sampling)).
+**A few notes on training.** ~~To give you an idea, with the default settings one epoch of MS COCO images is about 11000 iterations. After 1 epoch of training results in validation loss ~2.5 and CIDEr score of ~0.68. By iteration 60,000 CIDEr climbs up to about ~0.84 (validation loss at about 2.4 (under scheduled sampling)).~~
 
 ### Train using self critical
 
