@@ -18,8 +18,8 @@ import misc.utils as utils
 
 def language_eval(dataset, preds, model_id, split):
     import sys
-    sys.path.append("AI_Challenger/chuangxin_eval_public/caption_eval")
-    annFile = 'data/eval_reference.json'
+    sys.path.append("AI_Challenger/Evaluation/caption_eval")
+    annFile = 'data/eval_reference_new.json'
     from coco_caption.pycxtools.coco import COCO
     from coco_caption.pycxevalcap.eval import COCOEvalCap
 
