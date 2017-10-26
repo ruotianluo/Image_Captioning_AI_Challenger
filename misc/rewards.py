@@ -12,8 +12,8 @@ from torch.autograd import Variable
 import sys
 sys.path.append("cider")
 from pyciderevalcap.ciderD.ciderD import CiderD
-sys.path.append("coco-caption")
-from pycocoevalcap.bleu.bleu import Bleu
+sys.path.append("AI_Challenger/Evaluation/caption_eval")
+from coco_caption.pycxevalcap.bleu.bleu import Bleu
 
 CiderD_scorer = None
 Bleu_scorer = None
