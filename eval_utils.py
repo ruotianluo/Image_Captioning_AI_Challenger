@@ -18,8 +18,8 @@ import misc.utils as utils
 
 def language_eval(dataset, preds, model_id, split):
     import sys
-    sys.path.append("AI_Challenger/chuangxin_eval_public/caption_eval")
-    annFile = 'data/eval_reference.json'
+    sys.path.append("AI_Challenger/Evaluation/caption_eval")
+    annFile = 'data/eval_reference_new.json'
     from coco_caption.pycxtools.coco import COCO
     from coco_caption.pycxevalcap.eval import COCOEvalCap
 
@@ -102,7 +102,7 @@ def eval_split(model, crit, loader, eval_kwargs={}):
 
         for k, sent in enumerate(sents):
             if verbose:
-                print('image %s: %s' %(data['infos'][k]['id'], sent))
+                print('image %s: ' %(data['infos'][k]['id']), sent.encode('utf8', 'replace'))
             sent = sent.replace(' ', '')
             entry = {'image_id': data['infos'][k]['id'], 'caption': sent}
             if eval_kwargs.get('dump_path', 0) == 1:
