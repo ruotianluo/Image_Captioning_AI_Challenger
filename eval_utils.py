@@ -110,7 +110,6 @@ def eval_split(model, crit, loader, eval_kwargs={}):
         for k, sent in enumerate(sents):
             if verbose:
                 print('image %s: ' %(data['infos'][k]['id']), sent.encode('utf8', 'replace'))
-            sent = sent.replace(' ', '')
             entry = {'image_id': data['infos'][k]['id'], 'caption': sent}
             if eval_kwargs.get('dump_path', 0) == 1:
                 entry['file_name'] = data['infos'][k]['file_path']
