@@ -94,9 +94,9 @@ def build_dict(imgs, wtoi, params):
       ref_idxs = []
       for sent in img['sentences']:
         tmp_tokens = sent['tokens'] + ['<eos>']
-        tmp_tokens = [_ if _ in wtoi else 'UNK' for _ in tmp_tokens]
+        tmp_tokens = [_ if _ in wtoi else u'\u534d' for _ in tmp_tokens]
         ref_words.append(' '.join(tmp_tokens))
-        ref_idxs.append(' '.join([str(wtoi[_]) for _ in tmp_tokens]))
+        ref_idxs.append(' '.join([unicode(wtoi[_]) for _ in tmp_tokens]))
       refs_words.append(ref_words)
       refs_idxs.append(ref_idxs)
       count_imgs += 1
